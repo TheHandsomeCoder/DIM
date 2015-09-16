@@ -28,7 +28,7 @@ tabs.on('ready', function(tab) {
   worker = tab.attach({ //TODO: Find a more elegent way of passing the cookie to the extention. This only works if the cookie already exists.
         
   contentScriptFile: [  
-  data.url("./app/vendor/jquery/dist/jquery.min.js"),
+  data.url("./app/vendor/jquery/dist/jquery.js"),
   data.url("./app/vendor/angular/angular.min.js"),
   data.url("./app/vendor/angular-ui-router/release/angular-ui-router.min.js"),
   data.url("./app/vendor/angular-animate/angular-animate.min.js"),
@@ -42,10 +42,10 @@ tabs.on('ready', function(tab) {
   data.url("./app/vendor/angular-messages/angular-messages.min.js"),
   data.url("./app/vendor/angular-promise-tracker/promise-tracker.js"),
   data.url("./app/vendor/verge/verge.js" ), 
-  data.url("./app/scripts/ScrollToFixed.js"),
   data.url("./app/vendor/angular-chrome-storage/angular-chrome-storage.js"),
   data.url("./app/vendor/angular-cookies/angular-cookies.js"),
   data.url("./app/vendor/angular-hotkeys/build/hotkeys.js"), 
+  data.url("./app/scripts/ScrollToFixed.js"),
   data.url("./app/scripts/dimApp.module.js"),
   data.url("./app/scripts/dimApp.config.js"),
   data.url("./app/scripts/services/dimRateLimit.factory.js"),
