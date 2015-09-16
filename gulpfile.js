@@ -50,9 +50,11 @@ gulp.task('watch', function() {
 });
 
 
-gulp.task('firefox-dist', shell.task([
-  'mkdir -p dist/firefox',
-  'cd ./build/firefox && jpm xpi ' +
-  '--output-file=../../dist/firefox/firefox-extension-' + firefox.version +
-  '.xpi > /dev/null',
+gulp.task('firefox-build', shell.task([ 
+  'cd ./build/firefox && jpm xpi'  
 ]));
+
+gulp.task('firefox-run', shell.task([ 
+  'cd ./build/firefox && jpm run'  
+]));
+
