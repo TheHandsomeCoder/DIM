@@ -1,0 +1,18 @@
+{
+  "title": "My Jetpack Addon",
+  "name": "testaddon",
+  "version": "0.0.1",
+  "description": "A basic add-on",
+  "main": "index.js",
+  "author": "",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "permissions": {
+    "cross-domain-content": [
+      "https://www.bungie.net"
+    ]
+  },
+  "license": "MIT"  
+}
