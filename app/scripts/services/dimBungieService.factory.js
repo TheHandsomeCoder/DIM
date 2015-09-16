@@ -60,12 +60,20 @@
     }
 
     /************************************************************************************************************************************/
-
+    //TODO: Have this reviewed. Not 100% on the queue on how this will return on FF
     function getBnetCookies() {
       return $q(function(resolve, reject) {
-        chrome.cookies.getAll({
-          'domain': '.bungie.net'
-        }, getAllCallback);
+        if (!!window.chrome) {
+          chrome.cookies.getAll({
+            'domain': '.bungie.net'
+          }, getAllCallback);
+        } else { //firefox
+          console.log("Requesting cookie from index.js");
+          self.port.on("response-cookie", function(cookieValue) {
+            resolve(cookieValue);
+          });
+          self.port.emit("request-cookie");
+        }
 
         function getAllCallback(cookies) {
           if (_.size(cookies) > 0) {
@@ -83,25 +91,35 @@
       tokenPromise = tokenPromise || getBnetCookies()
         .then(function(cookies) {
           return $q(function(resolve, reject) {
-            var cookie = _.find(cookies, function(cookie) {
-              return cookie.name === 'bungled';
-            });
+            if (!window.chrome) {
+              /*
+                Firefox main.js has already searched for the cookie, return result.
+                TODO: Refactor to return the list of cookies. No point having specific calls whem they're already handled in getBnetCookies.
+              */
+              resolve(cookies);
 
-            if (!_.isUndefined(cookie)) {
-              resolve(cookie.value);
             } else {
-              chrome.tabs.query({
-                'url': '*://*.bungie.net/*'
-              }, function(tabs) {
-                if (_.size(tabs) === 0) {
-                  chrome.tabs.create({
-                    url: 'http://bungie.net',
-                    active: false
-                  });
-                }
+              var cookie = _.find(cookies, function(cookie) {
+                return cookie.name === 'bungled';
               });
 
-              reject(new Error('No bungled cookie found.'));
+              if (!_.isUndefined(cookie)) {
+                resolve(cookie.value);
+              } else {
+
+                chrome.tabs.query({
+                  'url': '*://*.bungie.net/*'
+                }, function(tabs) {
+                  if (_.size(tabs) === 0) {
+                    chrome.tabs.create({
+                      url: 'http://bungie.net',
+                      active: false
+                    });
+                  }
+                });
+
+                reject(new Error('No bungled cookie found.'));
+              }
             }
           });
         })
