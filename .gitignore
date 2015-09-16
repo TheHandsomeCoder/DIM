@@ -8,6 +8,7 @@ build/img
 build/manifest
 build/*.json
 build/manifest.zip
+build/firefox
 *.DS_Store
 
 !do-not-delete.txt

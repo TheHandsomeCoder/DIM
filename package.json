@@ -26,6 +26,13 @@
     "unzip": "^0.1.11"
   },
   "devDependencies": {
+    "event-stream": "^3.3.1",
+    "gulp": "^3.9.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-run-sequence": "^0.3.2",
+    "gulp-shell": "^0.4.3",
+    "gulp-zip": "^3.0.2",
+    "jpm": "^1.0.1",
     "uglify-js": "^2.4.23"
   }
 }
