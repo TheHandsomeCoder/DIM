@@ -43,10 +43,6 @@
           $rootScope.loadingTracker.addPromise(promise);
         }, 250);
       });
-
-      // var promise = dimPlatformService.getPlatforms();
-      //
-      // $rootScope.loadingTracker.addPromise(promise);
     }
 
     $scope.$on('dim-platforms-updated', function(e, args) {
