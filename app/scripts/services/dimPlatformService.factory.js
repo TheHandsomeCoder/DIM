@@ -55,8 +55,19 @@
       return _platforms;
     }
 
+    function getFromStorage(key){
+      return $q(function(resolve, reject) {
+       if(!!window.chrome){
+          resolve(chromeStorage.get(key));
+        } else{//firefox
+          resolve(localStorage.getItem(key));
+        }
+    });
+  }
+
     function getActivePlatform() {
-      var promise = chromeStorage.get('platformType').then(function(previousPlatformType) {
+
+      var promise = getFromStorage('platformType').then(function(previousPlatformType) {
         if (_.isUndefined(previousPlatformType)) {
           previousPlatformType = null;
         }
@@ -101,9 +112,18 @@
       var promise;
 
       if (_.isNull(platform)) {
-        promise = chromeStorage.drop('platformType');
+        if(window.chrome){
+          promise = chromeStorage.drop('platformType');
+        } else{//firefox
+          promise = localStorage.removeItem(platformType);
+        }
       } else {
-        promise = chromeStorage.set('platformType', platform.type);
+        if(window.chrome){
+          promise = chromeStorage.set('platformType', platform.type);
+        } else{//firefox
+          promise = localStorage.setItem('platformType', platform.type);
+        }
+
       }
 
       $rootScope.$broadcast('dim-active-platform-updated', { platform: _active });

@@ -98,7 +98,8 @@
               */
               resolve(cookies);
 
-            } else {
+            } 
+            else {
               var cookie = _.find(cookies, function(cookie) {
                 return cookie.name === 'bungled';
               });

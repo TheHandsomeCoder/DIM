@@ -55,6 +55,6 @@ gulp.task('firefox-build', shell.task([
 ]));
 
 gulp.task('firefox-run', shell.task([ 
-  'cd ./build/firefox && jpm run'  
+  'cd ./build/firefox && jpm run --debug -b /Applications/FirefoxDeveloperEdition.app'  
 ]));
 

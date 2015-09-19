@@ -127,7 +127,7 @@
       $stateProvider
         .state('inventory', {
           url: "/inventory",
-          templateUrl: "views/inventory.html"
+          templateUrl: "resource://dim/data/app/views/inventory.html"
         });
     });
 })();
