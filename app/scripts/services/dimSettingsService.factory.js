@@ -39,7 +39,22 @@
           }
         }
 
-        chrome.storage.sync.get(null, processStorageSettings);
+        if (!!window.chrome) {
+          chrome.storage.sync.get(null, processStorageSettings);
+        } else { //firefox
+          var settings = localStorage.getItem("settings-v1.0");
+          if (settings) {
+            resolve(settings);
+          } else {
+            resolve({
+              hideFilteredItems: false,
+              condensed: false,
+              characterOrder: 'mostRecent',
+              itemDetails: false,
+              itemStat: false
+            });
+          }
+        }
       });
     }
 
@@ -67,14 +82,18 @@
 
           data["settings-v1.0"] = settings;
 
-          chrome.storage.sync.set(data, function(e) {
-            if (chrome.runtime.lastError) {
-              $q.reject(chrome.runtime.lastError);
-            } else {
-              $rootScope.$broadcast('dim-settings-updated', kvp);
-              return true;
-            }
-          });
+
+          if (!!window.chrome) {
+
+            chrome.storage.sync.set(data, function(e) {
+              if (chrome.runtime.lastError) {
+                $q.reject(chrome.runtime.lastError);
+              } else {
+                $rootScope.$broadcast('dim-settings-updated', kvp);
+                return true;
+              }
+            });
+          }
         });
     }
   }

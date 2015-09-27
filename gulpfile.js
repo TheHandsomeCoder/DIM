@@ -1,10 +1,10 @@
-var gulp     = require('gulp');
-var clean    = require('gulp-clean');
-var es       = require('event-stream');
-var rseq     = require('gulp-run-sequence');
-var zip      = require('gulp-zip');
-var shell    = require('gulp-shell');
-var firefox  = require('./firefox/package');
+var gulp = require('gulp');
+var clean = require('gulp-clean');
+var es = require('event-stream');
+var rseq = require('gulp-run-sequence');
+var zip = require('gulp-zip');
+var shell = require('gulp-shell');
+var firefox = require('./firefox/package');
 
 function pipe(src, transforms, dest) {
   if (typeof transforms === 'string') {
@@ -35,14 +35,14 @@ gulp.task('chrome', function() {
 
 gulp.task('firefox', function() {
   return es.merge(
-    pipe('./app/**/*', './build/firefox/data/app'),  
-    pipe('./firefox/index.js', './build/firefox/'),  
+    pipe('./app/**/*', './build/firefox/data/app'),
+    pipe('./firefox/index.js', './build/firefox/'),
     pipe('./firefox/package.json', './build/firefox/')
   );
 });
 
 gulp.task('default', function(cb) {
-    return rseq('clean', ['chrome', 'firefox'], cb);
+  return rseq('clean', ['chrome', 'firefox'], cb);
 });
 
 gulp.task('watch', function() {
@@ -50,11 +50,11 @@ gulp.task('watch', function() {
 });
 
 
-gulp.task('firefox-build', shell.task([ 
-  'cd ./build/firefox && jpm xpi'  
+gulp.task('firefox-build', shell.task([
+  'cd ./build/firefox && jpm xpi'
 ]));
 
-gulp.task('firefox-run', shell.task([ 
-  'cd ./build/firefox && jpm run --debug -b /Applications/FirefoxDeveloperEdition.app'  
-]));
-
+gulp.task('firefox-run', function(cb) {
+  return rseq('firefox',
+    shell.task(['cd ./build/firefox && jpm run --debug -b /Applications/FirefoxDeveloperEdition.app']));
+});
