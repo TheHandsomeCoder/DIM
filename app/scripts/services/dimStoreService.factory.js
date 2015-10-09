@@ -269,7 +269,7 @@
 
             return $q.all(asyncItems);
           })
-          .then(function() {
+          .then(function(items) {
             var stores = _stores;
 
             return $q(function(resolve, reject) {
@@ -289,6 +289,9 @@
             });
 
             return stores;
+          })
+          .catch(function(error){
+            console.log(error.message);
           });
 
         return promise;
@@ -534,7 +537,8 @@
           createdItem.xpComplete = true;
         }
 
-        var talents = talentDefs.data[item.talentGridHash];
+        // var talents = talentDefs.data[item.talentGridHash];
+        var talents = talentDefs[item.talentGridHash];
 
         var ascendNode = (talents) ? _.filter(talents.nodes, function(node) {
           return _.some(node.steps, function(step) {
@@ -554,7 +558,8 @@
         }
 
         _.each(createdItem.perks, function(perk) {
-          var perkDef = perkDefs.data[perk.perkHash];
+          var perkDef = perkDefs[perk.perkHash];
+          //var perkDef = perkDefs.data[perk.perkHash];
           if (perkDef) {
             _.each(['displayName', 'displayDescription'], function(attr) {
               if (perkDef[attr]) {

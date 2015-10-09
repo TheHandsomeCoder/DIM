@@ -56,5 +56,5 @@ gulp.task('firefox-build', shell.task([
 
 gulp.task('firefox-run', function(cb) {
   return rseq('firefox',
-    shell.task(['cd ./build/firefox && jpm run --debug -b /Applications/FirefoxDeveloperEdition.app']));
+    shell.task(['cd ./build/firefox && jpm run']));
 });
