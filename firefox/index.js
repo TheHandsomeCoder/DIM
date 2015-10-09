@@ -7,6 +7,7 @@ var item_data = JSON.parse(data.load('app/scripts/api-manifest/items.json'));
 var objective_data = JSON.parse(data.load('app/scripts/api-manifest/objectives.json'));
 var sandbox_data = JSON.parse(data.load('app/scripts/api-manifest/perks.json'));
 var talent_data = JSON.parse(data.load('app/scripts/api-manifest/talent.json'));
+var bucket_data = JSON.parse(data.load('app/scripts/api-manifest/buckets.json'));
 
 function getBungieCookies() {
     console.log("Recieved Cookie Request");
@@ -77,6 +78,14 @@ tabs.on('ready', function(tab) {
             data.url("./app/scripts/store/dimStoreHeading.directive.js"),
             data.url("./app/scripts/move-popup/dimMovePopup.directive.js"),
             data.url("./app/scripts/move-popup/dimMoveItemProperties.directive.js"),
+
+            data.url("./app/scripts/infuse/dimInfuse.factory.js"),
+            data.url("./app/scripts/infuse/dimInfuseItem.directive.js"),
+            data.url("./app/scripts/infuse/dimShareData.factory.js"),
+            data.url("./app/scripts/infuse/dimInfuse.controller.js"),
+            data.url("./app/scripts/services/dimItemBucketDefinitions.factory.js"),
+            
+            
             data.url("./app/scripts/google.js")
         ]
     });
@@ -103,6 +112,11 @@ tabs.on('ready', function(tab) {
     worker.port.on("request-talent-definitions", function() {
         console.log("index.js received talent definitions request");
         worker.port.emit('talent-data', talent_data);
+    });
+
+    worker.port.on("request-bucket-definitions", function() {
+        console.log("index.js received talent definitions request");
+        worker.port.emit('bucket-data', bucket_data);
     });
    
 });

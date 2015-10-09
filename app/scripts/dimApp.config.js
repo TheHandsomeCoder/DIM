@@ -32,9 +32,11 @@
         'Gauntlets',
         'Chest',
         'Leg',
-        'ClassItem',
+        'ClassItem'
       ],
       General: [
+        'Artifact',
+        'Emote',
         'Emblem',
         'Armor',
         'Ghost',
@@ -132,7 +134,6 @@
     });
 })();
 
-
 $(document).ready(function() {
   if (verge.viewportW() !== $(window).width()) {
     $('body').addClass('pad-margin');
@@ -142,3 +143,36 @@ $(document).ready(function() {
     document.getElementsByTagName('head')[0].appendChild(style);
   }
 });
+
+if (typeof window.onerror == "object") {
+  window.onerror = function(err, url, line) {};
+}
+
+(function(window) {
+  // Retain a reference to the previous global error handler, in case it has been set:
+  var originalWindowErrorCallback = window.onerror;
+
+  window.onerror = function customErrorHandler(errorMessage, url, lineNumber, columnNumber, errorObject) {
+      var exceptionDescription = errorMessage;
+      if (typeof errorObject !== 'undefined' && typeof errorObject.message !== 'undefined') {
+        exceptionDescription = errorObject.message;
+      }
+
+      _gaq.push([
+        'errorTracker._trackEvent',
+        'DIM - Chrome Extension - v3.1.12.1',
+        exceptionDescription,
+        ' @ ' + url + ':' + lineNumber + ':' + columnNumber,
+        0,
+        true
+      ]);
+  //  }
+
+    // If the previous "window.onerror" callback can be called, pass it the data:
+    if (typeof originalWindowErrorCallback === 'function') {
+      return originalWindowErrorCallback(errorMessage, url, lineNumber, columnNumber, errorObject);
+    }
+    // Otherwise, Let the default handler run:
+    return false;
+  };
+})(window);

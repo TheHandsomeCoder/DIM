@@ -4,9 +4,9 @@
   angular.module('dimApp')
     .factory('dimStoreService', StoreService);
 
-  StoreService.$inject = ['$rootScope', '$q', 'dimBungieService', 'dimSettingsService', 'dimPlatformService', 'dimItemTier', 'dimCategory', 'dimItemDefinitions', 'dimObjectiveDefinitions', 'dimTalentDefinitions', 'dimSandboxPerkDefinitions'];
+  StoreService.$inject = ['$rootScope', '$q', 'dimBungieService', 'dimSettingsService', 'dimPlatformService', 'dimItemTier', 'dimCategory', 'dimItemDefinitions', 'dimItemBucketDefinitions', 'dimObjectiveDefinitions', 'dimTalentDefinitions', 'dimSandboxPerkDefinitions'];
 
-  function StoreService($rootScope, $q, dimBungieService, settings, dimPlatformService, dimItemTier, dimCategory, dimItemDefinitions, dimObjectiveDefinitions, dimTalentDefinitions, dimSandboxPerkDefinitions) {
+  function StoreService($rootScope, $q, dimBungieService, settings, dimPlatformService, dimItemTier, dimCategory, dimItemDefinitions, dimItemBucketDefinitions, dimObjectiveDefinitions, dimTalentDefinitions, dimSandboxPerkDefinitions) {
     var _stores = [];
     var _index = 0;
 
@@ -85,15 +85,20 @@
       setHeight('.sub-section.sort-gauntlets');
       setHeight('.sub-section.sort-leg');
       setHeight('.sub-section.sort-classitem');
+      setHeight('.sub-section.sort-artifact');
       setHeight('.sub-section.sort-emblem');
       setHeight('.sub-section.sort-armor');
       setHeight('.sub-section.sort-ghost');
+      setHeight('.sub-section.sort-emote');
       setHeight('.sub-section.sort-ship');
       setHeight('.sub-section.sort-vehicle');
       setHeight('.sub-section.sort-consumable');
       setHeight('.sub-section.sort-material');
       setHeight('.sub-section.sort-missions');
       setHeight('.sub-section.sort-bounties');
+      setHeight('.sub-section.sort-messages');
+      setHeight('.sub-section.sort-special-orders');
+      setHeight('.sub-section.sort-lost-items');
       setHeight('.weapons');
       setHeight('.armor');
       setHeight('.general');
@@ -116,6 +121,7 @@
           .then(function(stores) {
             _stores.splice(0);
             var asyncItems = [];
+            var glimmer, marks;
 
             _.each(stores, function(raw) {
               var store;
@@ -127,6 +133,8 @@
                   'lastPlayed': '2005-01-01T12:00:01Z',
                   'icon': '',
                   'items': [],
+                  legendaryMarks: marks,
+                  glimmer: glimmer,
                   'bucketCounts': {},
                   hasExotic: function(type) {
                     var predicate = {
@@ -162,6 +170,16 @@
                   items = _.union(items, bucket.items);
                 });
               } else {
+
+
+                try {
+                  glimmer = _.find(raw.character.base.inventory.currencies, function(cur) { return cur.itemHash === 3159615086 }).value;
+                  marks = _.find(raw.character.base.inventory.currencies, function(cur) { return cur.itemHash === 2534352370 }).value;
+                } catch (e) {
+                  glimmer = 0;
+                  marks = 0;
+                }
+
                 store = {
                   id: raw.id,
                   icon: raw.character.base.emblemPath,
@@ -428,12 +446,77 @@
           4248486431
         ];
 
-      var iterator = function(definitions, objectiveDef, perkDefs, talentDefs, item, index) {
+      var iterator = function(definitions, itemBucketDef, objectiveDef, perkDefs, talentDefs, item, index) {
         var itemDef = definitions[item.itemHash];
-
         // Missing definition?
         if (itemDef === undefined) {
-          return;
+          // maybe it is classified...
+          itemDef = {
+            classified: true,
+            icon: '/common/destiny_content/icons/f0dcc71487f77a69005bec2e3fb6e4e8.jpg'
+          }
+
+          switch (item.itemHash) {
+            case 3012398149: {
+              item.isEquipment = true;
+              item.primaryStat = {value: 'Sleeper'};
+
+              itemDef.itemHash = 3012398149;
+              itemDef.bucketTypeHash = 953998645;
+              itemDef.classType = 3;
+              itemDef.itemType = 3;
+              itemDef.itemTypeName = 'Fusion Rifle';
+              itemDef.itemName = 'Sleeper Simulant - Classified';
+
+              itemDef.maxStackSize = 1;
+              itemDef.tierTypeName = "Exotic";
+              itemDef.equippable = true;
+              itemDef.hasAction = true;
+              itemDef.nonTransferrable = true;
+              break;
+            }
+
+            case 3227022822: {
+              item.isEquipment = true;
+              item.primaryStat = {value: 'Spindle'};
+
+              itemDef.bucketTypeHash = 2465295065;
+              itemDef.classType = 3;
+              itemDef.itemType = 3;
+              itemDef.itemTypeName = 'Sniper Rifle';
+              itemDef.itemName = 'Black Spindle - Classified';
+
+              itemDef.maxStackSize = 1;
+              itemDef.tierTypeName = "Exotic";
+              itemDef.equippable = true;
+              itemDef.hasAction = true;
+              itemDef.nonTransferrable = true;
+              break;
+            }
+
+            case 3688594189: {
+              item.isEquipment = true;
+              item.primaryStat = {value: 'Malice'};
+
+              itemDef.bucketTypeHash = 1498876634;
+              itemDef.classType = 3;
+              itemDef.itemType = 3;
+              itemDef.itemTypeName = 'Scout Rifle';
+              itemDef.itemName = 'Touch of Malice - Classified';
+
+              itemDef.maxStackSize = 1;
+              itemDef.tierTypeName = "Exotic";
+              itemDef.equippable = true;
+              itemDef.hasAction = true;
+              itemDef.nonTransferrable = true;
+              break;
+            }
+          }
+
+          // unidentified item.
+          if(!itemDef.itemName) {
+            window.onerror("Missing Item Definition - " + JSON.stringify(_.pick(item, 'canEquip', 'cannotEquipReason', 'equipRequiredLevel', 'isEquipment', 'itemHash', 'location', 'stackSize', 'talentGridHash')), 'dimStoreService.factory.js', 491, 11);
+          }
         }
 
         if (_.isUndefined(itemDef.itemTypeName) || _.isUndefined(itemDef.itemName)) {
@@ -444,13 +527,14 @@
         //   return;
         // }
 
-        var itemType = getItemType(itemDef.itemTypeName, itemDef.itemName);
+        var itemType = getItemType(item, itemDef, itemBucketDef);
 
         if (item.itemHash === 937555249) {
           itemType = "Material";
         }
 
         var weaponClass = null;
+
 
         if (!itemType) {
           return;
@@ -462,6 +546,10 @@
         }
 
         var itemSort = sortItem(itemDef.itemTypeName);
+
+        if (_.isUndefined(itemSort)) {
+          console.log(itemDef.itemTypeName + " does not have a sort property.");
+        }
 
         if (item.location === 4) {
           itemSort = 'Postmaster';
@@ -476,13 +564,21 @@
 
         var dmgName = [null, 'kinetic', 'arc', 'solar', 'void'][item.damageType];
 
+        // Try to make a unique, but stable ID. This isn't always possible, such as in the case of consumables.
+        var index = item.itemHash + '-';
+        if (item.itemInstanceId === '0') {
+          index = index + getNextIndex();
+        } else {
+          index = index + item.itemInstanceId;
+        }
+
         var createdItem = {
-          index: getNextIndex(),
+          index: index,
           owner: owner,
           hash: item.itemHash,
           type: itemType,
           sort: itemSort,
-          tier: itemDef.tierTypeName,
+          tier: (!_.isUndefined(itemDef.tierTypeName) ? itemDef.tierTypeName : 'Common'),
           name: itemDef.itemName,
           description: itemDef.itemDescription || '', // Added description for Bounties for now JFLAY2015
           icon: itemDef.icon,
@@ -498,7 +594,10 @@
           primStat: item.primaryStat,
           stats: item.stats,
           perks: item.perks,
-          maxStackSize: definitions[item.itemHash].maxStackSize,
+          nodes: item.nodes,
+          //talents: talentDefs.data[item.talentGridHash],
+          talentPerks: getTalentPerks(item, talentDefs),
+          maxStackSize: itemDef.maxStackSize,
           classType: itemDef.classType,
           /* 0: titan, 1: hunter, 2: warlock, 3: any */
           dmg: dmgName,
@@ -507,15 +606,16 @@
           ascended: false,
           lockable: item.lockable,
           locked: item.locked,
-          weaponClass: weaponClass || ''
+          weaponClass: weaponClass || '',
+          classified: itemDef.classified
         };
 
         // Bounties
         if (_.has(item, 'objectives') && (_.size(item.objectives) > 0) && (_.isNumber(item.objectives[0].objectiveHash))) {
           var objectiveDefObj = objectiveDef[item.objectives[0].objectiveHash],
-              progressGoal    = objectiveDefObj.completionValue > 0 ? objectiveDefObj.completionValue : 1;
+            progressGoal = objectiveDefObj.completionValue > 0 ? objectiveDefObj.completionValue : 1;
 
-          createdItem.complete   = item.objectives[0].isComplete;
+          createdItem.complete = item.objectives[0].isComplete;
           createdItem.xpComplete = Math.floor(item.objectives[0].progress / progressGoal * 100);
         }
 
@@ -569,9 +669,9 @@
           }
         });
 
-        if (createdItem.tier !== 'Basic') {
+        // if (createdItem.tier !== 'Basic') {
           result.push(createdItem);
-        }
+        // }
       };
 
       var iteratorPB;
@@ -581,13 +681,17 @@
         .then(function(defs) {
           iteratorPB = iterator.bind(null, defs);
         })
+        .then(dimItemBucketDefinitions.getDefinitions)
+        .then(function(defs) {
+          iteratorPB = iteratorPB.bind(null, defs);
+        })
         .then(dimObjectiveDefinitions.getDefinitions)
         .then(function(defs) {
-            iteratorPB = iteratorPB.bind(null, defs);
+          iteratorPB = iteratorPB.bind(null, defs);
         })
         .then(dimSandboxPerkDefinitions.getDefinitions)
         .then(function(defs) {
-            iteratorPB = iteratorPB.bind(null, defs);
+          iteratorPB = iteratorPB.bind(null, defs);
         })
         .then(dimTalentDefinitions.getDefinitions)
         .then(function(defs) {
@@ -634,7 +738,64 @@
       return 'unknown';
     }
 
-    function getItemType(type, name) {
+    function getTalentPerks(item, talents) {
+      var talent = talents.data[item.talentGridHash];
+
+      if (talent) {
+        return _.chain(talent.nodes).map(function(node) {
+            return node.steps;
+          })
+          .flatten()
+          .pluck('nodeStepHash')
+          .value();
+      } else {
+        return [];
+      }
+    }
+
+    /* Not Implemented */
+    // Engram,
+    // Trials Reward,
+    // Currency,
+    // Material Exchange,
+    // Equipment,
+    // Invitation,
+    // Camera,
+    // Buff,
+    // Bribe,
+    // Incomplete Engrams,
+    // Corrupted Engrams,
+
+    function getItemType(item, def, buckets) {
+      var type = def.itemTypeName;
+      var name = def.itemName;
+
+      if (def.bucketTypeHash === 3621873013) {
+        return null;
+      }
+
+      if (def.bucketTypeHash === 2422292810) {
+        if (item.location !== 4)
+          return null;
+      }
+
+      if (def.bucketTypeHash === 375726501) {
+        if (type.indexOf("Message ") != -1) {
+          return 'Messages';
+        }
+
+        if (type.indexOf("Package") != -1) {
+          return 'Messages';
+        }
+
+        if (["Public Event Completed"].indexOf(name) != -1) {
+          return "Messages";
+        }
+
+        return 'Missions';
+      }
+
+
       if (_.isUndefined(type) || _.isUndefined(name)) {
         return {
           'general': 'General',
@@ -644,6 +805,10 @@
 
       //if(type.indexOf("Engram") != -1 || name.indexOf("Marks") != -1) {
       if (name.indexOf("Marks") != -1) {
+        return null;
+      }
+
+      if (type === 'Mission Reward') {
         return null;
       }
 
@@ -662,8 +827,12 @@
         if (["Vex Mythoclast", "Universal Remote", "No Land Beyond"].indexOf(name) != -1) {
           typeObj.general = 'Primary';
         }
+
+        if (def.itemHash === 3012398149) {
+          typeObj.general = 'Heavy';
+        }
       }
-      if (["Rocket Launcher", "Machine Gun", "Heavy Weapon Engram"].indexOf(type) != -1)
+      if (["Rocket Launcher", "Sword", "Machine Gun", "Heavy Weapon Engram"].indexOf(type) != -1)
         typeObj.general = 'Heavy';
       if (["Titan Mark", "Hunter Cloak", "Warlock Bond", "Class Item Engram"].indexOf(type) != -1)
         return 'ClassItem';
@@ -680,7 +849,7 @@
           return '';
         return 'Material';
       }
-      if (["Commendation", "Trials of Osiris"].indexOf(type) != -1) {
+      if (["Commendation", "Trials of Osiris", "Faction Badge"].indexOf(type) != -1) {
         if (name.indexOf("Redeemed") != -1) {
           return null;
         }
@@ -688,7 +857,42 @@
         return 'Missions';
       }
 
+      if (type.indexOf("Summoning Rune") != -1) {
+        return "Material";
+      }
+
+      if (type.indexOf("Emote") != -1) {
+        return "Emote";
+      }
+
+      if (type.indexOf("Artifact") != -1) {
+        return "Artifact";
+      }
+
       if (type.indexOf(" Bounty") != -1) {
+        if (def.hasAction === true) {
+          return 'Bounties';
+        } else {
+          return null;
+        }
+      }
+
+      if (type.indexOf("Treasure Map") != -1) {
+        return 'Bounties';
+      }
+
+      if (type.indexOf("Bounty Reward") != -1) {
+        return 'Bounties';
+      }
+
+      if (type.indexOf("Queen's Orders") != -1) {
+        return 'Bounties';
+      }
+
+      if (type.indexOf("Curio") != -1) {
+        return 'Bounties';
+      }
+      if (type.indexOf("Vex Technology") != -1) {
         return 'Bounties';
       }
 
@@ -696,8 +900,29 @@
         return 'Bounties';
       }
 
+      if (type.indexOf("Relic") != -1) {
+        return 'Bounties';
+      }
+
+      if (type.indexOf("Message ") != -1) {
+        return 'Messages';
+      }
+
       if (type.indexOf("Package") != -1) {
         return 'Messages';
+      }
+
+      if (type.indexOf("Armsday Order") != -1) {
+        switch (def.bucketTypeHash) {
+          case 2465295065:
+            return 'Special';
+          case 1498876634:
+            return 'Primary';
+          case 953998645:
+            return 'Heavy';
+          default:
+            return 'Special Orders';
+        }
       }
 
       if (typeObj.general !== '') {
@@ -719,12 +944,19 @@
     }
 
     function sortItem(type) {
-      if (["Pulse Rifle", "Sniper Rifle", "Shotgun", "Scout Rifle", "Sidearm", "Hand Cannon", "Fusion Rifle", "Rocket Launcher", "Auto Rifle", "Machine Gun", "Primary Weapon Engram", "Special Weapon Engram", "Heavy Weapon Engram"].indexOf(type) != -1)
+      if (["Pulse Rifle", "Sword", "Sniper Rifle", "Shotgun", "Scout Rifle", "Sidearm", "Hand Cannon", "Fusion Rifle", "Rocket Launcher", "Auto Rifle", "Machine Gun", "Primary Weapon Engram", "Special Weapon Engram", "Heavy Weapon Engram"].indexOf(type) != -1)
         return 'Weapons';
       if (["Titan Mark", "Hunter Cloak", "Warlock Bond", "Helmet Engram", "Leg Armor Engram", "Body Armor Engram", "Gauntlet Engram", "Gauntlets", "Helmet", "Chest Armor", "Leg Armor", "Class Item Engram"].indexOf(type) != -1)
         return 'Armor';
-      if (["Restore Defaults", "Titan Subclass", "Hunter Subclass", "Warlock Subclass", "Armor Shader", "Emblem", "Ghost Shell", "Ship", "Vehicle", "Consumable", "Material", "Currency"].indexOf(type) != -1)
+      if (["Quest Step", "Warlock Artifact", "Hunter Artifact", "Titan Artifact", "Faction Badge", "Treasure Map", "Vex Technology", "Curio", "Relic", "Summoning Rune", "Queen's Orders", "Crucible Bounty", "Vanguard Bounty", "Vehicle Upgrade", "Emote", "Restore Defaults", "Titan Subclass", "Hunter Subclass", "Warlock Subclass", "Armor Shader", "Emblem", "Ghost Shell", "Ship", "Ship Schematics", "Vehicle", "Consumable", "Material", "Currency"].indexOf(type) != -1)
         return 'General';
+      if (["Daily Reward", "Package", "Armsday Order"]) {
+        return 'Postmaster';
+      }
+
+      if (type.indexOf("Message ") != -1) {
+        return 'Postmaster';
+      }
     }
   }
 })();

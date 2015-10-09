@@ -23,10 +23,11 @@
         '  <span><a target="_new" href="http://db.destinytracker.com/inventory/item/{{vm.item.hash}}">{{vm.title}}</a></span>',
         '  <span ng-if="vm.item.type === \'Bounties\' && !vm.item.complete" class="bounty-progress"> | {{vm.item.xpComplete}}%</span>',
         '  <span ng-if="vm.light > 0"> &#10022; {{ vm.light }}</span>',
-        '  <span ng-repeat="stat in vm.stats track by stat.label"> | {{ stat.label }} {{ stat.value }}</span>',
-        '  <span class="pull-right move-popup-info-detail" ng-mouseover="vm.itemDetails = true;" ng-if="!vm.itemDetails && vm.item.type != \'Bounties\'"><span class="fa fa-info-circle"></span></span>',
+        '  <div class="inline-stats"><span ng-repeat="stat in vm.stats track by stat.label"> | {{ stat.label }} {{ stat.value }}</span></div>',
+        '  <span class="pull-right move-popup-info-detail" ng-mouseover="vm.itemDetails = true;" ng-if="!vm.itemDetails && vm.item.type != \'Bounties\' && !vm.item.classified"><span class="fa fa-info-circle"></span></span>',
         '</div>',
-        '<div class="item-details" ng-show="vm.item.stats.length && vm.item.type != \'Bounties\'">',
+        '<div class="item-details" ng-show="vm.item.classified">Classified item. Bungie does not yet provide information about this item. Item is not yet transferable.</div>',
+        '<div class="item-details" ng-show="vm.itemDetails && vm.item.stats.length && vm.item.type != \'Bounties\'">',
         '  <div class="item-stats" ng-repeat="stat in vm.item.stats track by $index">',
         '    <div class="stat-box-row">',
         '       <span class="stat-box-text"> {{ stat.name }} </span>',
@@ -38,6 +39,7 @@
         '    </div>',
         '  </div>',
         '  <div class="item-perks">',
+        '    <div ng-if="vm.isInfusable(vm.item)" ng-click="vm.infuse(vm.item, $event)" title="Infusion calculator" alt="Infusion calculator" style="background-image: url(\'/images/{{vm.item.sort}}.png\')"></div>',
         '    <div ng-repeat="perk in vm.item.perks track by $index" title="{{perk.displayName}}\n{{perk.displayDescription}}" style="background-image: url(http://bungie.net{{ perk.iconPath }})"></div>',
         '  </div>',
         '</div>'
@@ -45,9 +47,9 @@
     };
   }
 
-  MoveItemPropertiesCtrl.$inject = ['$sce', 'dimSettingsService'];
+  MoveItemPropertiesCtrl.$inject = ['$sce', 'dimSettingsService', 'ngDialog'];
 
-  function MoveItemPropertiesCtrl($sce, settings) {
+  function MoveItemPropertiesCtrl($sce, settings, ngDialog) {
     var vm = this;
 
     vm.classes = {
@@ -151,5 +153,36 @@
         });
       }
     }
+
+    /*
+    * Check that the current item is infusable
+    * Only legendary or Exotic items are infusable.
+    */
+    vm.isInfusable = function isInfusable(item) {
+      // Infuse perk's id is 1270552711
+      return _.contains(item.talentPerks, 1270552711);
+    }
+
+    /*
+    * Open up the dialog for infusion by passing
+    * the selected item
+    */
+    vm.infuse = function infuse(item, e) {
+      e.stopPropagation();
+
+      // Close the move-popup
+      ngDialog.closeAll();
+
+      // Open the infuse window
+      var infuse = ngDialog.open({
+        template: 'views/infuse.html',
+        overlay: false,
+        className: 'app-settings',
+        controller: ['dimShareData', function(shareDataService) {
+          shareDataService.setItem(item);
+        }]
+      });
+    }
+
   }
 })();

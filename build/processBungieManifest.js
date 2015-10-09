@@ -55,7 +55,6 @@ function processItemRows(rows, prop) {
 function onManifestRequest(error, response, body) {
   var parsedResponse = JSON.parse(body);
   var manifestFile = fs.createWriteStream("manifest.zip");
-
   version = parsedResponse.Response.version;
 
 
@@ -145,8 +144,7 @@ function extractDB(dbFile) {
 
     rows.forEach(function(row) {
       var item = JSON.parse(row.json);
-      delete item.equippingBlock;
-      items[item.itemHash] = item;
+      items[item.bucketHash] = item;
     });
 
     var defs = fs.createWriteStream('buckets.json');
@@ -188,10 +186,17 @@ function extractDB(dbFile) {
         var defs = fs.createWriteStream('perks.json');
         defs.write(JSON.stringify(items));
     });
+
+    console.log("done.");
 }
 
 mkdirp('img/misc', function(err) { });
 mkdirp('common/destiny_content/icons', function(err) { });
 
-request
-  .get('http://www.bungie.net/platform/Destiny/Manifest/', onManifestRequest);
+request({
+    headers: {
+      'X-API-Key': '57c5ff5864634503a0340ffdfbeb20c0'
+    },
+    uri: 'http://www.bungie.net/platform/Destiny/Manifest/',
+    method: 'GET'
+  }, onManifestRequest);

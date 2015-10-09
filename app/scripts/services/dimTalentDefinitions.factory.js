@@ -9,7 +9,7 @@
   function TalentDefinitions($q, $timeout, $http) {
     var deferred = $q.defer();
 
-    // $http.get('scripts/api-manifest/talent.json?v=3.1.2')
+    // $http.get('scripts/api-manifest/talent.json?v=3.1.12.1')
     //   .then(function(data) {
     //     deferred.resolve(data);
     //   },
@@ -27,6 +27,7 @@
     
     console.log("Requesting talent definition from index.js");
     self.port.emit("request-talent-definitions");
+
 
     return {
       'getDefinitions': function() { return deferred.promise; }

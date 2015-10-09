@@ -24,11 +24,11 @@
         '        <span>{{ ::key }}</span>',
         '        <span class="bucket-count" ng-if="vm.store.id === \'vault\'">{{ vm.sortSize[key] ? vm.sortSize[key] : 0 }}/{{ (key === \'Weapons\' || key === \'Armor\') ? 72 : 36 }}  </span>',
         '      </div>',
-        '      <div ng-repeat="type in value" class="sub-section sort-{{ type.replace(\' \', \'-\').toLowerCase() }}" ng-class="vm.data[vm.orderedTypes[type]] ? \'\' : \'empty\'" ui-on-drop="vm.onDrop($data, $event, false)" drop-channel="{{ type }}">',
-        '        <div ng-class="vm.styles[type.replace(\' \', \'-\')].equipped" ng-if="vm.store.id !== \'vault\'" ui-on-drop="vm.onDrop($data, $event, true)" drop-channel="{{ type }}">',
+        '      <div ng-repeat="type in value" class="sub-section sort-{{ type.replace(\' \', \'-\').toLowerCase() }}" ng-class="vm.data[vm.orderedTypes[type]] ? \'\' : \'empty\'" ui-on-drop="vm.onDrop($data, $event, false)" drop-channel="{{ type + \',\' + vm.store.id + type }}">',
+        '        <div ng-class="vm.styles[type.replace(\' \', \'-\')].equipped" ng-if="vm.store.id !== \'vault\'" ui-on-drop="vm.onDrop($data, $event, true)" drop-channel="{{ type + \',\' + vm.store.id + type }}">',
         '          <div ng-repeat="item in vm.data[vm.orderedTypes[type]].equipped track by item.index" dim-store-item store-data="vm.store" item-data="item"></div>',
         '        </div>',
-        '        <div ng-class="vm.styles[type.replace(\' \', \'-\')].unequipped" ui-on-drop="vm.onDrop($data, $event, false)" drop-channel="{{ type }}">',
+        '        <div ng-class="vm.styles[type.replace(\' \', \'-\')].unequipped" ui-on-drop="vm.onDrop($data, $event, false)" drop-channel="{{ type + \',\' + vm.store.id + type }}">',
         '          <div ng-repeat="item in vm.data[vm.orderedTypes[type]].unequipped track by item.index" dim-store-item store-data="vm.store" item-data="item"></div>',
         '          <div class="item-target"></div>',
         '        </div>',
@@ -43,19 +43,21 @@
       scope.vm.onDrop = function(id, $event, equip) {
         var vm = scope.vm;
 
-        var srcElement = $window.document.querySelector('#' + id);
+        var srcElement = $('#' + id);
 
-        vm.moveDroppedItem(angular.element(srcElement)
+        vm.moveDroppedItem(angular.element(srcElement[0])
           .scope()
           .item, equip);
       };
     }
   }
 
-  StoreItemsCtrl.$inject = ['$scope', '$rootScope', 'dimStoreService', 'dimItemService', '$q', '$timeout', 'toaster'];
+  StoreItemsCtrl.$inject = ['$scope', '$rootScope', 'dimStoreService', 'dimItemService', '$q', '$timeout', 'toaster', 'dimSettingsService'];
 
-  function StoreItemsCtrl($scope, $rootScope, dimStoreService, dimItemService, $q, $timeout, toaster) {
+  function StoreItemsCtrl($scope, $rootScope, dimStoreService, dimItemService, $q, $timeout, toaster, dimSettingsService) {
     var vm = this;
+
+
     var types = [ // Order of types in the rows.
       'Class',
       'Primary',
@@ -66,11 +68,13 @@
       'Chest',
       'Leg',
       'ClassItem',
+      'Artifact',
       'Ghost',
       'Emblem',
       'Armor',
       'Ship',
       'Vehicle',
+      'Emote',
       'Consumable',
       'Material',
       'Missions',
@@ -110,11 +114,13 @@
         'ClassItem'
       ],
       General: [
+        'Artifact',
         'Ghost',
         'Consumable',
         'Material',
         'Emblem',
         'Armor',
+        'Emote',
         'Ship',
         'Vehicle',
         'Missions',
@@ -166,11 +172,19 @@
         equipped: 'equipped equippable',
         unequipped: 'unequipped equippable',
       },
+      Artifact: {
+        equipped: 'equipped equippable',
+        unequipped: 'unequipped equippable',
+      },
       Emblem: {
         equipped: 'equipped equippable',
         unequipped: 'unequipped equippable',
       },
       Armor: {
+        equipped: 'equipped equippable',
+        unequipped: 'unequipped equippable',
+      },
+      Emote: {
         equipped: 'equipped equippable',
         unequipped: 'unequipped equippable',
       },
@@ -209,50 +223,57 @@
     };
 
     function generateData() {
-      if (vm.store.id === 'vault') {
-        vm.sortSize = _(vm.store.items)
-          .chain()
-          .groupBy(function(i) {
-            return i.sort;
-          })
-          .mapObject(function(val, key) {
-            return _.size(val);
-          })
-          .value();
-      }
-
-      return _.chain(vm.store.items)
-        .sortBy(function(item) {
-          return item.name;
-        })
-        .sortBy(function(item) {
-          switch (item.tier) {
-            case 'Exotic':
-              return 0;
-            case 'Legendary':
-              return 1;
-            case 'Rare':
-              return 2;
-            case 'Uncommon':
-              return 3;
-            case 'Common':
-              return 4;
-            default:
-              return 5;
+      return dimSettingsService.getSetting('itemSort')
+        .then(function(sort) {
+          if (vm.store.id === 'vault') {
+            vm.sortSize = _(vm.store.items)
+              .chain()
+              .groupBy(function(i) {
+                return i.sort;
+              })
+              .mapObject(function(val, key) {
+                return _.size(val);
+              })
+              .value();
           }
-        })
-        .sortBy(function(item) {
-          return vm.orderedTypes[item.type];
-        })
-        .groupBy(function(item) {
-          return vm.orderedTypes[item.type];
-        })
-        .mapObject(function(values, key) {
-          return _.groupBy(values, function(item) {
-            return (item.equipped ? 'equipped' : 'unequipped');
-          });
-        })
-        .value();
+
+          return _.chain(vm.store.items)
+            .sortBy(function(item) {
+              return item.name;
+            })
+            .sortBy(function(item) {
+              if (sort === 'rarity') {
+                switch (item.tier) {
+                  case 'Exotic':
+                    return 0;
+                  case 'Legendary':
+                    return 1;
+                  case 'Rare':
+                    return 2;
+                  case 'Uncommon':
+                    return 3;
+                  case 'Common':
+                    return 4;
+                  default:
+                    return 5;
+                }
+              } else {
+                return ((item.primStat) ? -1 * item.primStat.value : 1000);
+              }
+            })
+            .sortBy(function(item) {
+              return vm.orderedTypes[item.type];
+            })
+            .groupBy(function(item) {
+              return vm.orderedTypes[item.type];
+            })
+            .mapObject(function(values, key) {
+              return _.groupBy(values, function(item) {
+                return (item.equipped ? 'equipped' : 'unequipped');
+              });
+            })
+            .value();
+        });
     }
 
     vm.moveDroppedItem = function(item, equip) {
@@ -310,10 +331,18 @@
       $rootScope.loadingTracker.addPromise(promise);
     };
 
-    $scope.$watch('vm.store.items', function(newVal) {
-      vm.data = generateData();
+    function resetData() {
+        generateData()
+          .then(function(data) {
+            vm.data = data;
+            $timeout(dimStoreService.setHeights, 0);
+          });
+    }
 
-      $timeout(dimStoreService.setHeights, 0);
+    var debounceResetData = _.debounce(resetData, 500);
+
+    $scope.$watch('vm.store.items', function(newVal) {
+      resetData();
     }, true);
   }
 })();
