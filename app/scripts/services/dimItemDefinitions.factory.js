@@ -16,14 +16,13 @@
     console.log("Requesting item definition from index.js");
     self.port.emit("request-item-definitions");
 
-    // $http.get('scripts/api-manifest/items.json?v=3.1.12.1')
+    // $http.get('scripts/api-manifest/items.json?v=3.1.12.2')
     //   .success(function(data) {
     //     deferred.resolve(data);
     //   })
     //   .error(function(data) {
     //     deferred.reject(new Error('The items definition file was not parsed correctly.'));
     //   });
-
 
     return {
       'getDefinitions': function() { return deferred.promise; }
