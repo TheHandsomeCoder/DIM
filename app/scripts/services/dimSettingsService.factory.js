@@ -63,23 +63,28 @@
             resolve(currentSettings);
           }
 
-        if (!!window.chrome) {
-          chrome.storage.sync.get(null, processStorageSettings);
-        } else { //firefox
-          var settings = localStorage.getItem("settings-v1.0");
-          if (settings) {
-            resolve(settings);
-          } else {
-            resolve({
-              hideFilteredItems: false,
-              condensed: false,
-              characterOrder: 'mostRecent',
-              itemDetails: false,
-              itemStat: false
-            });
+          if (!!window.chrome) {
+            chrome.storage.sync.get(null, processStorageSettings);
+          } else { //firefox
+            var settings = localStorage.getItem("settings-v1.0");
+            if (settings) {
+              resolve(settings);
+            } else {
+              resolve({
+                hideFilteredItems: false,
+                itemDetails: false,
+                itemStat: false,
+                condensed: false,
+                characterOrder: 'mostRecent',
+                itemSort: 'primaryStat',
+                charCol: 3,
+                vaultCol: 4
+              });
+            }
           }
-        }
-      });
+        });
+      }
+    }
 
     function getSettings() {
       return loadSettings();
@@ -112,10 +117,7 @@
           kvp[key] = value;
 
           data["settings-v1.0"] = settings;
-
-
           if (!!window.chrome) {
-
             chrome.storage.sync.set(data, function(e) {
               if (chrome.runtime.lastError) {
                 $q.reject(chrome.runtime.lastError);
@@ -124,6 +126,8 @@
                 return true;
               }
             });
+          } else {
+            console.log("Implement FF here");
           }
         });
     }
@@ -135,13 +139,17 @@
 
           data["settings-v1.0"] = settings;
 
-          chrome.storage.sync.set(data, function(e) {
-            if (chrome.runtime.lastError) {
-              $q.reject(chrome.runtime.lastError);
-            } else {
-              return true;
-            }
-          });
+          if (!!window.chrome) {
+            chrome.storage.sync.set(data, function(e) {
+              if (chrome.runtime.lastError) {
+                $q.reject(chrome.runtime.lastError);
+              } else {
+                return true;
+              }
+            });
+          } else {
+            console.log("Implement FF here");
+          }
         });
     }
   }

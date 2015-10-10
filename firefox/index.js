@@ -10,7 +10,7 @@ var talent_data = JSON.parse(data.load('app/scripts/api-manifest/talent.json'));
 var bucket_data = JSON.parse(data.load('app/scripts/api-manifest/buckets.json'));
 
 function getBungieCookies() {
-    console.log("Recieved Cookie Request");
+    console.log("getBungieCookies Function");
     var {
         Cc, Ci
     } = require("chrome");
