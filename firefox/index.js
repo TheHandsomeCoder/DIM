@@ -1,4 +1,3 @@
-
 var tabs = require("sdk/tabs");
 var pagemod = require("sdk/page-mod");
 var pageurl = require("sdk/self").data.url("app/index.html");

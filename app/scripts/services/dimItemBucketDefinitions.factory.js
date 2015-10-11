@@ -8,9 +8,11 @@
 
   function ItemBucketDefinitions($q, $timeout, $http) {
     var deferred = $q.defer();
+   
     
     self.port.on('bucket-data', function(data) {
       console.log("Recieved bucket Definitions from Index.js");
+      deferred.resolve(data);
     });
     
     console.log("Requesting bucket definition from index.js");
@@ -26,7 +28,11 @@
     //   });
 
     return {
-      'getDefinitions': function() { return deferred.promise; }
+      'getDefinitions': function() { 
+        console.log("get bucket def"); 
+        return deferred.promise; 
+
+      }
     };
   }
 })(angular);

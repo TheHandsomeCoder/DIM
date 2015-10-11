@@ -25,7 +25,9 @@
     //   });
 
     return {
-      'getDefinitions': function() { return deferred.promise; }
+      'getDefinitions': function() { 
+         console.log("item def get"); 
+        return deferred.promise; }
     };
   }
 })(angular);
