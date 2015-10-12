@@ -678,29 +678,24 @@
 
       // Bind our arguments to the iterator method
       var promise = dimItemDefinitions.getDefinitions()
-        .then(function(defs) {
-          console.log("Iterator item def");        
+        .then(function(defs) {           
           iteratorPB = iterator.bind(null, defs);
         })
         .then(dimItemBucketDefinitions.getDefinitions)
         .then(function(defs) {
-           console.log("Iterator bucket def"); 
           iteratorPB = iteratorPB.bind(null, defs);
         })
         .then(dimObjectiveDefinitions.getDefinitions)
         .then(function(defs) {
-          console.log("Iterator Objective def"); 
           iteratorPB = iteratorPB.bind(null, defs);
         })
         .then(dimSandboxPerkDefinitions.getDefinitions)
         .then(function(defs) {
-          console.log("Iterator Perk def"); 
           iteratorPB = iteratorPB.bind(null, defs);
         })
         .then(dimTalentDefinitions.getDefinitions)
         .then(function(defs) {
-           console.log("Iterator Talent def"); 
-          iteratorPB = iteratorPB.bind(null, defs);
+         iteratorPB = iteratorPB.bind(null, defs);
 
           _.each(items, iteratorPB);
 

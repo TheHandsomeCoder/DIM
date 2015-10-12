@@ -3,9 +3,9 @@
 
   angular.module('dimApp').controller('dimAppCtrl', DimApp);
 
-  DimApp.$inject = ['ngDialog', '$rootScope', 'dimPlatformService', 'dimStoreService', '$interval', 'hotkeys', '$timeout', 'dimStoreService'];
+  DimApp.$inject = ['ngDialog', '$rootScope', 'dimPlatformService', 'dimStoreService', '$interval', 'hotkeys', '$timeout', 'dimStoreService','dimURLService'];
 
-  function DimApp(ngDialog, $rootScope, dimPlatformService, storeService, $interval, hotkeys, $timeout, dimStoreService) {
+  function DimApp(ngDialog, $rootScope, dimPlatformService, storeService, $interval, hotkeys, $timeout, dimStoreService, dimURLService) {
     var vm = this;
     var aboutResult = null;
     var settingResult = null;
@@ -53,7 +53,7 @@
         ngDialog.closeAll();
 
         settingResult = ngDialog.open({
-          template: 'views/setting.html',
+          template: dimURLService.getURL('views/setting.html'),
           overlay: false,
           className: 'app-settings',
           scope: $('body > div').scope()

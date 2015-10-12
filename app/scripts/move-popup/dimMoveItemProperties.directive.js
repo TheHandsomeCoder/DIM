@@ -191,7 +191,7 @@
 
       // Open the infuse window
       var infuse = ngDialog.open({
-        template: 'views/infuse.html',
+        template: 'resource://dim/data/app/views/infuse.html',
         overlay: false,
         className: 'app-settings',
         controller: ['dimShareData', function(shareDataService) {

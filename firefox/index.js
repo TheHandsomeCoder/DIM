@@ -7,6 +7,7 @@ var objective_data = JSON.parse(data.load('app/scripts/api-manifest/objectives.j
 var sandbox_data = JSON.parse(data.load('app/scripts/api-manifest/perks.json'));
 var talent_data = JSON.parse(data.load('app/scripts/api-manifest/talent.json'));
 var bucket_data = JSON.parse(data.load('app/scripts/api-manifest/buckets.json'));
+var app_URL = data.url("app/");
 
 function getBungieCookies() {
     console.log("getBungieCookies Function");
@@ -39,7 +40,7 @@ tabs.on('ready', function(tab) {
             data.url("./app/vendor/angular-animate/angular-animate.min.js"),
             data.url("./app/scripts/toaster.js"),
             data.url("./app/vendor/angular-native-dragdrop/draganddrop.js"),
-            data.url("./app/vendor/ngDialog/js/ngDialog.min.js"),
+            data.url("./app/vendor/ngDialog/js/ngDialog.js"),
             data.url("./app/vendor/Angular.uuid2/dist/angular-uuid2.min.js"),
             data.url("./app/vendor/underscore/underscore-min.js"),
             data.url("./app/vendor/lz-string/libs/lz-string.min.js"),
@@ -83,10 +84,14 @@ tabs.on('ready', function(tab) {
             data.url("./app/scripts/infuse/dimShareData.factory.js"),
             data.url("./app/scripts/infuse/dimInfuse.controller.js"),
             data.url("./app/scripts/services/dimItemBucketDefinitions.factory.js"),
+            data.url("./app/scripts/services/dimURLService.factory.js"),
             
             
             data.url("./app/scripts/google.js")
-        ]
+        ],
+        contentScriptOptions: {
+            'appUrl': pageurl
+        }
     });
     worker.port.on("request-cookie", function() {
         console.log("index.js received cookie request");

@@ -4,34 +4,22 @@
   angular.module('dimApp')
     .factory('dimItemBucketDefinitions', ItemBucketDefinitions);
 
-  ItemBucketDefinitions.$inject = ['$q', '$timeout', '$http'];
+  ItemBucketDefinitions.$inject = ['$q', '$timeout', '$http', 'dimURLService'];
 
-  function ItemBucketDefinitions($q, $timeout, $http) {
+  function ItemBucketDefinitions($q, $timeout, $http, dimURLService) {
     var deferred = $q.defer();
    
-    
-    self.port.on('bucket-data', function(data) {
-      console.log("Recieved bucket Definitions from Index.js");
-      deferred.resolve(data);
-    });
-    
-    console.log("Requesting bucket definition from index.js");
-    self.port.emit("request-bucket-definitions");
-
-
-    // $http.get('scripts/api-manifest/buckets.json?v=3.1.12.2')
-    //   .success(function(data) {
-    //     deferred.resolve(data);
-    //   })
-    //   .error(function(data) {
-    //     deferred.reject(new Error('The item buckets definition file was not parsed correctly.'));
-    //   });
+    $http.get(dimURLService.getURL('scripts/api-manifest/buckets.json?v=3.1.12.2'))
+      .success(function(data) {
+        deferred.resolve(data);
+      })
+      .error(function(data) {
+        deferred.reject(new Error('The item buckets definition file was not parsed correctly.'));
+      });
 
     return {
-      'getDefinitions': function() { 
-        console.log("get bucket def"); 
+      'getDefinitions': function() {         
         return deferred.promise; 
-
       }
     };
   }
